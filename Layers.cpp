@@ -8,6 +8,7 @@
 #include "qfile.h"
 #include "qtextstream.h"
 #include "PeriodicTable.h"
+#include "Python_bindings.h"
 
 using namespace std;
 
@@ -1057,7 +1058,7 @@ bool Layers::CheckPLFile()
 //
 void Layers::GetBasicSections()
 {
-
+    PythonBinds::calcDistribution(p);
 }
 
 /////////////////////////////////////////////////////////////
@@ -1065,7 +1066,7 @@ void Layers::GetBasicSections()
 //
 void Layers::GetFinalSections()
 {
-
+    PythonBinds::getDistribution(p);
 }
 
 
@@ -1829,14 +1830,25 @@ void Layers::OnOK()
 	
 	if (reply == QMessageBox::Yes)
 	{
-		GetBasicSections(); // Запуск расчета базовых сечений
-		if (CheckPLFile()) //Соответствие PL и LAY файлов
-			GetFinalSections(); // Запуск расчета итоговых сечений
-		else
-			QMessageBox::warning(this, tr("Manager"),
-				QString::fromLocal8Bit("Файлы с описанием слоев(LAY) и описанием взаимодействия частиц со слоями(PL) не соответствуют(разное кол-во слоев, разные номера слоев)!\nИтоговые сечения не рассчитаны!"));
+
+        //if (CheckPLFile()) //Соответствие PL и LAY файлов
+        //    GetFinalSections(); // Запуск расчета итоговых сечений
+        //else 
+        //{
+        //    QMessageBox::warning(this, tr("Manager"),
+        //        QString::fromLocal8Bit("Файлы с описанием слоев(LAY) и описанием взаимодействия частиц со слоями(PL) не соответствуют(разное кол-во слоев, разные номера слоев)!\nИтоговые сечения не рассчитаны!"));
+        //    return;
+        //}
+
+        PythonBinds::start_interpreteter();
+        PythonBinds::initiateInterpritater(p.home.toStdString());
+
+		int status_calc_distr = PythonBinds::calcDistribution(p); // Запуск расчета базовых сечений
+        if (!status_calc_distr)
+		    int status_get_distr = PythonBinds::getDistribution(p); // Запуск расчета базовых сечений
 	}
 
+    PythonBinds::finalize_interpreteter();
     ok = true;
     this->close();	//конец работы
 }
