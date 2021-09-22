@@ -26,7 +26,9 @@ Layers::Layers(QWidget *parent)
             return;
         }
 		FileName = qApp->arguments().last();
+        Path = QDir::currentPath();
 		i = ReadFile(FileName);
+        
 	}
 	else // открывается вне студии
 	{
@@ -1156,13 +1158,28 @@ void Layers::init_paths()
 	appDir.cdUp();
 	appPath = appDir.path();
 	p.execDir = appPath;
-	p.mat = appPath + "/.." + "/share/scripts/mat_files";
-	p.par = appPath + +"/.." "/share/scripts/xrb_parameters.ini";
-	p.home = appPath + +"/.." "/share/scripts";
+	p.mat = appPath  + "/share/scripts/mat_files";
+	p.par = appPath + "/share/scripts/xrb_parameters.ini";
+	p.home = appPath + "/share/scripts";
 	p.proj = Path;
-	p.rmp = Path + "/" + FileName.replace("LAY", "LTB");
+    p.rmp = Path + "/" + FileName;
+    p.rmp.replace("LAY", "LTB");
 	p.lay = layersName;
-	p.tab = Path + "/pechs/materials";
+	p.tab = Path + "/pechs/object/materials";
+
+    QFile file(Path + "/pechs/object/materials/paths.txt");
+    file.open(QFile::WriteOnly | QFile::Text);
+    QTextStream out(&file);
+    out << p.execDir << endl;
+    out << p.par << endl;
+    out << p.mat << endl;
+    out << p.home << endl;
+    out << p.proj << endl;
+    out << p.rmp << endl;
+    out << p.lay << endl;
+    out << p.tab << endl;
+
+    file.close();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1751,8 +1768,6 @@ void Layers::OnOpenMratTable()
     OnInList();
 }
 
-
-
 /////////////////////////////////////////////////////////////////////////////
 // Устанавливаем плотность из mrat - файла
 //
@@ -1761,7 +1776,6 @@ void Layers::OnGetRoFromMrat()
     ui.density_le->setText(QString("%1").arg(RoMrat));
     OnInList();
 }
-
 
 /////////////////////////////////////////////////////////////////////////////
 // Выход без сохранения данных
@@ -1828,24 +1842,26 @@ void Layers::OnOK()
 	reply = QMessageBox::question(this, " ", QString::fromLocal8Bit("Запустить расчет сечений?"),
 		QMessageBox::Yes | QMessageBox::No);
 	
+    
+
 	if (reply == QMessageBox::Yes)
 	{
-
-        //if (CheckPLFile()) //Соответствие PL и LAY файлов
-        //    GetFinalSections(); // Запуск расчета итоговых сечений
-        //else 
-        //{
-        //    QMessageBox::warning(this, tr("Manager"),
-        //        QString::fromLocal8Bit("Файлы с описанием слоев(LAY) и описанием взаимодействия частиц со слоями(PL) не соответствуют(разное кол-во слоев, разные номера слоев)!\nИтоговые сечения не рассчитаны!"));
-        //    return;
-        //}
-
         PythonBinds::start_interpreteter();
         PythonBinds::initiateInterpritater(p.home.toStdString());
 
-		int status_calc_distr = PythonBinds::calcDistribution(p); // Запуск расчета базовых сечений
+        int status_calc_distr = PythonBinds::calcDistribution(p); // Запуск расчета базовых сечений
         if (!status_calc_distr)
-		    int status_get_distr = PythonBinds::getDistribution(p); // Запуск расчета базовых сечений
+            int status_get_distr = PythonBinds::getDistribution(p);// Запуск расчета итоговых сечений
+        //if (CheckPLFile()) //Соответствие PL и LAY файлов
+        //{
+        //    if (!status_calc_distr)
+        //        int status_get_distr = PythonBinds::getDistribution(p);// Запуск расчета итоговых сечений
+        //} 
+       /* else 
+        {
+            QMessageBox::warning(this, tr("Manager"),
+                QString::fromLocal8Bit("Файлы с описанием слоев(LAY) и описанием взаимодействия частиц со слоями(PL) не соответствуют(разное кол-во слоев, разные номера слоев)!\nИтоговые сечения не рассчитаны!"));
+        }*/
 	}
 
     PythonBinds::finalize_interpreteter();
