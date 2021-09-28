@@ -1167,19 +1167,19 @@ void Layers::init_paths()
 	p.lay = layersName;
 	p.tab = Path + "/pechs/object/materials";
 
-    QFile file(Path + "/pechs/object/materials/paths.txt");
-    file.open(QFile::WriteOnly | QFile::Text);
-    QTextStream out(&file);
-    out << p.execDir << endl;
-    out << p.par << endl;
-    out << p.mat << endl;
-    out << p.home << endl;
-    out << p.proj << endl;
-    out << p.rmp << endl;
-    out << p.lay << endl;
-    out << p.tab << endl;
+    //QFile file(Path + "/pechs/object/materials/paths.txt");
+    //file.open(QFile::WriteOnly | QFile::Text);
+    //QTextStream out(&file);
+    //out << p.execDir << endl;
+    //out << p.par << endl;
+    //out << p.mat << endl;
+    //out << p.home << endl;
+    //out << p.proj << endl;
+    //out << p.rmp << endl;
+    //out << p.lay << endl;
+    //out << p.tab << endl;
 
-    file.close();
+    //file.close();
 }
 
 ////////////////////////////////////////////////////////////////////////
